@@ -1,0 +1,9 @@
+let token="",api=(u,o={})=>fetch(u,{...o,headers:{"Content-Type":"application/json","Authorization:"Bearer "+token,...(o.headers||{})}});
+function login(){fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({user:$("user").value,password:$("pass").value})}).then(r=>r.json()).then(x=>{if(x.token){token=x.token;$("login").hidden=true;$("dash").hidden=false;state()}else alert(x.error||"فشل الدخول")})}
+const $=x=>document.getElementById(x);
+async function state(){let r=await api("/api/admin/state"),d=await r.json();$("bankList").innerHTML=d.banks.map(x=>`<p>${x.name} — USD ${x.usdBuy}/${x.usdSell} <button onclick="delBank('${x.id}')">حذف</button></p>`).join("");$("alertList").innerHTML=d.alerts.map(x=>`<p>${x.name}: ${x.direction} ${x.value} (${x.market}) <button onclick="delAlert('${x.id}')">حذف</button></p>`).join("")}
+async function addParallel(){await api("/api/admin/parallel",{method:"POST",body:JSON.stringify({buy:$("pb").value,sell:$("ps").value,city:$("city").value,source:$("src").value})});alert("تم الحفظ");state()}
+async function addBank(){await api("/api/admin/bank",{method:"POST",body:JSON.stringify({name:$("bn").value,usdBuy:$("ub").value,usdSell:$("us").value,eurBuy:$("eb").value,eurSell:$("es").value,city:$("bc").value})});alert("تم الحفظ");state()}
+async function delBank(id){await api("/api/admin/bank/"+id,{method:"DELETE"});state()}
+async function addAlert(){await api("/api/admin/alert",{method:"POST",body:JSON.stringify({name:$("an").value,market:$("am").value,direction:$("ad").value,value:$("av").value})});alert("تم الحفظ");state()}
+async function delAlert(id){await api("/api/admin/alert/"+id,{method:"DELETE"});state()}
